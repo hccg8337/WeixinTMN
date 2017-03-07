@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 """WeixinTMN URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -16,6 +18,27 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+
+from . import views
+
+
 urlpatterns = [
+    url(r'^index/$', views.index),
+    url(r'^syncdb/$', views.syncdb),
+    #step 3
+    url(r'^init/$', views.init),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^action/', include('action.urls')),
+    url(r'^config/', include('config.urls')),
+    url(r'^customuser/', include('custom_user.urls')),
+    url(r'^game/', include('game.urls')),
+    url(r'^gamestemplate/', include('games_template.urls')),
+    url(r'^log/', include('log.urls')),
+    url(r'^module/', include('module.urls')),
+    url(r'^msg/', include('msg.urls')),
+    url(r'^node/', include('node.urls')),
+    url(r'nodestemplate/', include('nodes_template.urls')),
+    url(r'^role/', include('role.urls')),
+    url(r'usersgroup/', include('users_group.urls')),
+    url(r'weixininterface/', include('weixin_interface.urls')),
 ]

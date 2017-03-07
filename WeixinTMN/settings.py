@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 """
 Django settings for WeixinTMN project.
 
@@ -13,6 +15,11 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+import warnings
+
+from conf import ProjectConfig
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -25,7 +32,7 @@ SECRET_KEY = '%!07kvvw+mxyd4@ne329bzj1i2)=^*nm-^d5+yk4)$@c9(3z3)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +44,21 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'action.apps.ActionConfig',
+    'config.apps.ConfigConfig',
+    'custom_user.apps.CustomUserConfig',
+    'document.apps.DocumentConfig',
+    'game.apps.GameConfig',
+    'games_template.apps.GamesTemplateConfig',
+    'log.apps.LogConfig',
+    'module.apps.ModuleConfig',
+    'msg.apps.MsgConfig',
+    'node.apps.NodeConfig',
+    'nodes_template.apps.NodesTemplateConfig',
+    'role.apps.RoleConfig',
+    'users_group.apps.UsersGroupConfig',
+    'weixin_interface.apps.WeixinInterfaceConfig',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -55,7 +77,7 @@ ROOT_URLCONF = 'WeixinTMN.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,11 +96,31 @@ WSGI_APPLICATION = 'WeixinTMN.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
+if 'SERVER_SOFTWARE' in os.environ:
+    from sae.const import (MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
+else:
+    #MYSQL_HOST = 'w.rdc.sae.sina.com.cn'
+    #MYSQL_PORT = '3306'
+    #MYSQL_USER = 'mom5ozl0mm'
+    #MYSQL_PASS = 'wx2mjl1mlwjw0mw25jx5z0ky2hmiy535m3mxmjyh'
+    #MYSQL_DB = 'app_qusenjoy'
+    #from sae._restful_mysql import monkey
+    #monkey.patch()
+    MYSQL_HOST = 'localhost'
+    MYSQL_PORT = '3306'
+    MYSQL_USER = 'root'
+    MYSQL_PASS = '123456'
+    MYSQL_DB = 'test'
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+  'default': {
+    'ENGINE':  'django.db.backends.mysql',
+    'NAME':  MYSQL_DB,
+    'USER':  MYSQL_USER,
+    'PASSWORD': MYSQL_PASS,
+    'HOST':  MYSQL_HOST,
+    'PORT':  MYSQL_PORT,
+  }
 }
 
 
@@ -87,16 +129,24 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-
 STATIC_URL = '/static/'
+
+
+DEFAULT_CHARSET = 'utf-8'
+
+
+warnings.filterwarnings(
+    'error', r"DateTimeField .* received a naive datetime",
+    RuntimeWarning, r'django\.db\.models\.fields',
+)

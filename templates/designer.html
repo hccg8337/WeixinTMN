@@ -1,0 +1,267 @@
+{% load staticfiles %}
+{% load usertags %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=0.5, user-scalable=yes, minimum-scale=0.1, maximum-scale=3.0"/>
+    <title>{{ title }}</title>
+    <style type="text/css">
+        .input_list{
+            height:3.0625em;
+            background-color:#337ab7;
+            font-size:1em;
+            letter-spacing: .6px;
+
+            text-align:center;
+            border-color:#666666;
+            border-radius:0px;
+            vertical-align: top;
+        }
+        .input_comments{
+            height:3.0625em;
+            background-color:white;
+            font-size:1em;
+            letter-spacing: .6px;
+            color:#ffffff;
+            text-align:center;
+            border-color:#666666;
+            border-radius:0px;
+            vertical-align: top;
+        }
+        .input_border
+        {
+            border: 2px solid red;
+            -webkit-box-shadow: 0px 0px 6px red;"
+        "-moz-box-shadow: 0px 0px 5px red;
+        box-shadow: 0px 0px 5px red;
+        }
+        .can-change
+        {
+            color: black;
+        }
+        .no-change
+        {
+            color: green;
+        }
+        .input_list2{
+            height:3.0625em;
+            background-color:#337ab7;
+            font-size:1em;
+            letter-spacing: .6px;
+            color:#ffffff;
+            text-align:center;
+            border-color:#666666;
+            border-radius:0px;
+            vertical-align: top;
+        }
+        .testTxt{
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+            font-size: 1em;
+            border: 1px solid #cccccc;
+            outline: none;
+            color: #808080;
+
+        }
+        .green:focus {
+            transition: border  linear .2s, box-shadow linear .5s;
+            -moz-transition: border linear .2s, -moz-box-shadow  linear .5s;
+            -webkit-transition: border linear .2s, -webkit-box-shadow linear .5s;
+            outline: none;
+            border-color: rgba(19,105,172,.75);
+            box-shadow: 0 0 3px rgba(19,105,192,.5);
+            -moz-box-shadow: 0 0 3px rgba(241,39,232,.5);
+            -webkit-box-shadow: 0 0 3px rgba(19,105,252,3);
+        }
+        .div_list {
+            display: block;
+            width: 12.5em;
+            height: 1.875em;
+            border-radius: 10%;
+            overflow: hidden;
+            border: 1px solid #000;
+            background: gray;
+            margin: 0.625em auto;
+        }
+
+        .line1{
+            height: 3.75em;
+            width:0.125em;
+            background: #0000ff;
+            margin: 0px auto;
+            position:relative; left:-6.875em;
+
+        }
+
+        .longline{
+            height: 0.125em;
+            width:12.5em;
+            background: #0000ff;
+            margin:0 auto;
+            position:relative; left:-6.875em;
+        }
+        .leftline{
+            height: 1.875em;
+            width: 0.125em;
+            background: #0000ff;
+            margin:0 auto;
+            position:relative; left:-13.125em;
+        }
+        .rightline{
+            height: 1.875em;
+            width:0.125em;
+            background:#0000ff;
+            margin:-1.875em auto 0;
+            position:relative;
+            left: -0.625em;
+        }
+        .rightblock{
+            rows: 3;
+            resize: none;
+        }
+        .del1{
+            height:3.0625em;
+            width: 1.875em;
+            vertical-align: top;
+        }
+        .add1{
+            height:3.0625em;
+            width: 1.875em;
+            vertical-align: top;
+        }
+        .state-default{
+            background: grey;
+
+        }
+        .state-unfinished{
+            background: #8EE5EE;
+
+        }
+        .state-done{
+            background: green;
+
+        }
+        .state-broken{
+            background: red;
+
+        }
+    </style>
+
+    {% include 'header.html' %}
+    <link rel="stylesheet" href="{% static 'css/multiple-select.css' %}"/>
+
+</head>
+<body>
+<a href="/index/" class="button icon approve">返回首页</a>
+<h1 align="center" id="game" gameid="{{ r.id }}" edit="{{ request.session.userid|has_permission:'NO004008' }}" cancel="{{ request.session.userid|has_permission:'NO004014' }}" state="{{ request.session.userid|has_permission:'NO004011,NO004012,NO004013' }}" add="{{ request.session.userid|has_permission:'NO004001' }}" date="{{ r.workstarttime|date:'Y-m-d' }}">比赛：{{ r.name }}</h1>
+
+
+<div id="view"></div>
+
+
+</section>
+
+<div style="margin:0 auto;width:18.75em;">
+    {% if request.session.userid|has_permission:'NO005001' %}
+    <a class="button icon add" id="add_node">增加</a>
+    {% endif %}
+</div>
+
+<div class="am-modal am-modal-prompt" tabindex="-1" id="nodeModal">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">节点信息</div>
+        <div class="am-modal-bd">
+            <input id="nodeid" hidden>
+            <div>
+                <label for="nodeName">名称</label>
+                <input name="nodeDeadline1" type="text" class="testTxt green" id="nodeName">
+            </div>
+            <div>
+                <label for="nodeDeadline">截止时间</label>
+                <input name="nodeDeadline1" type="time" class="testTxt green" id="nodeDeadline">
+            </div>
+            <div>
+                <label for="nodeNotifytime">提前</label>
+                <input type="text" class="testTxt green" id="nodeNotifytime">
+                <label for="nodeNotifytime">分钟提醒</label>
+            </div>
+            <div>
+                <label for="nodeComments">备注信息</label>
+                <textarea name="nodeComments1" class="form-control" rows="3" id="nodeComments"></textarea>
+            </div>
+            {% if request.session.userid|has_permission:'NO004018' %}
+            <div>
+                <label for="nodePermit">权限分配</label>
+                <select id="nodePermit" multiple="multiple">
+                    <optgroup label="小组">
+                    </optgroup>
+
+                    <optgroup label="用户">
+                    </optgroup>
+                </select>
+            </div>
+            {% endif %}
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span class="am-modal-btn" data-am-modal-confirm>提交</span>
+        </div>
+    </div>
+</div>
+
+<div class="am-modal am-modal-prompt" tabindex="-1" id="stateModal">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">节点信息</div>
+        <div class="am-modal-bd">
+            <input name="nodeid" hidden>
+            <div>
+                <label for="nodeName">名称</label>
+                <input type="text" class="testTxt green" name="nodeName" readonly>
+            </div>
+            <div>
+                <label>节点状态</label>
+                <select name="nodeState">
+
+                </select>
+            </div>
+            <div>
+                <label for="nodeComments">备注</label>
+                <textarea class="form-control" rows="3" name="nodeComments"></textarea>
+            </div>
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span class="am-modal-btn" data-am-modal-confirm>提交</span>
+        </div>
+    </div>
+</div>
+
+<div class="am-modal am-modal-loading am-modal-no-btn" tabindex="-1" id="my-modal-loading">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">正在载入...</div>
+        <div class="am-modal-bd">
+            <span class="am-icon-spinner am-icon-spin"></span>
+        </div>
+    </div>
+</div>
+
+</body>
+
+{% include 'footer.html' %}
+<script src="{% static 'js/multiple-select.js' %}"></script>
+<script src="{% static 'js/nodes.js' %}"></script>
+<script type="text/javascript">
+    'use strict';
+
+    $(document).ready(function() {
+        $('#add_node').on('click', function() {
+            showAddNode(null, null);
+        });
+
+        getNodesByGame();
+    });
+</script>
+</html>

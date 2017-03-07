@@ -1,0 +1,238 @@
+{% load staticfiles %}
+{% load usertags %}
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="format-detection" content="telephone=no" /><!--禁用电话号码识别-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="{% static 'css/notice.css' %}"/>
+    <title>{{ title }}</title>
+    <style>
+        .state-default{
+            width: 40px;
+            height: 40px;
+            background: grey;
+            border-radius: 50%;
+        }
+        .state-processing{
+            width: 40px;
+            height: 40px;
+            background: blue;
+            border-radius: 50%;
+        }
+        .state-finished{
+            width: 40px;
+            height: 40px;
+            background: green;
+            border-radius: 50%;
+        }
+        .state-warning{
+            width: 40px;
+            height: 40px;
+            background: red;
+            border-radius: 50%;
+        }
+        .state-cancelled{
+            width: 40px;
+            height: 40px;
+            background: black;
+            border-radius: 50%;
+        }
+        .node{
+            text-align:center;
+            vertical-align: center;
+        }
+    </style>
+    {% include 'header.html' %}
+</head>
+<body>
+<div class="notice-box notice-in">
+        <div class="notice-main">
+            <div class="notice-contain">
+                <p><span>总体进度：</span><span>{{ total }}</span></p>
+                <p><span>故障设备：</span><span>{{ broken }}</span></p>
+                <p><span>紧急处理：</span><span>{{ emergency }}</span></p>
+                <p><span>消息：</span><span>{{ msg }}</span></p>
+            </div>
+            <img class="notice-pic" src="{% static 'img/pic-notice.png' %}" alt=""/>
+            <img class="notice-close" src="{% static 'img/pic-close.png' %}" alt=""/>
+        </div>
+</div>
+<div id="currentuser" cancel="{{ request.session.userid|has_permission:'NO005012' }}" process="{{ request.session.userid|has_permission:'NO004003,NO004004,NO004017' }}" edit="{{ request.session.userid|has_permission:'NO005006,NO005007' }}">
+    <h2>{{ request.session.userid|get_user_attr:'nickname' }}，您好</h2>
+</div>
+
+<div>
+    <form class="am-form" onSubmit="return false;" data-am-validator>
+        {% if request.session.userid|has_permission:'NO005002,NO005003' %}
+        <input id="datepicker" type="text" class="am-form-field" placeholder="日历" readonly required/>
+        {% endif %}
+        <div class="am-form-group">
+            <div class="am-u-sm-10 am-u-sm-offset-0">
+                {% if request.session.userid|has_permission:'NO005002,NO005003' %}
+                <button type="button" class="am-btn am-btn-primary" onclick="searchGames()">查询</button>
+                {% endif %}
+                {% if request.session.userid|has_permission:'NO005001' %}
+                <button type="button" class="am-btn am-btn-danger" onclick="showAddGame()">添加比赛</button>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+<br>
+<div id="view"></div>
+
+<form class="am-form am-form-horizontal" id="addGame" hidden onSubmit="return false;">
+    <legend>填写比赛相关信息</legend>
+    <div class="am-form-group">
+        <label for="addname" class="am-u-sm-5 am-form-label">名称</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="addname" placeholder="输入比赛名称">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="addworkstarttime" class="am-u-sm-5 am-form-label">工作开始时间</label>
+        <div class="am-u-sm-7">
+            <input type="time" id="addworkstarttime" placeholder="选择工作开始时间">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="addworkendtime" class="am-u-sm-5 am-form-label">工作结束时间</label>
+        <div class="am-u-sm-7">
+            <input type="time" id="addworkendtime" placeholder="选择工作结束时间">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="addworkextratime" class="am-u-sm-5 am-form-label">预留时间（分钟）</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="addworkextratime" placeholder="输入预留时间" value="0">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="addplace" class="am-u-sm-5 am-form-label">比赛场地</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="addplace" placeholder="输入比赛场地">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="addgamestarttime" class="am-u-sm-5 am-form-label">比赛开始时间</label>
+        <div class="am-u-sm-7">
+            <input type="time" id="addgamestarttime" placeholder="输入比赛开始时间">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="addcomments" class="am-u-sm-5 am-form-label">备注</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="addcomments" placeholder="输入备注">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <button type="submit" class="am-btn am-btn-default" onclick="addGame()">添加</button>
+        <button type="button" class="am-btn am-btn-default" onclick="cancelAddGame()">取消</button>
+    </div>
+</form>
+
+<form class="am-form am-form-horizontal" id="editGame" hidden onSubmit="return false;">
+    <legend>填写比赛相关信息</legend>
+
+    <div class="am-form-group" style="display: none;">
+        <label for="editid" class="am-u-sm-5 am-form-label">ID</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="editid" value="" placeholder="id">
+        </div>
+    </div>
+    <div class="am-form-group">
+        <label for="editname" class="am-u-sm-5 am-form-label">名称</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="editname" value="" placeholder="输入名称">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="editworkstarttime" class="am-u-sm-5 am-form-label">工作开始时间</label>
+        <div class="am-u-sm-7">
+            <input type="time" id="editworkstarttime" value="" placeholder=" 选择工作开始时间">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="editworkendtime" class="am-u-sm-5 am-form-label">工作结束时间</label>
+        <div class="am-u-sm-7">
+            <input type="time" id="editworkendtime" value="" placeholder="选择工作结束时间">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="editworkextratime" class="am-u-sm-5 am-form-label">预留时间（分钟）</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="editworkextratime" placeholder="输入预留时间" value="">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="editplace" class="am-u-sm-5 am-form-label">比赛场地</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="editplace" value="y777" placeholder="输入比赛场地">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="editgamestarttime" class="am-u-sm-5 am-form-label">比赛开始时间</label>
+        <div class="am-u-sm-7">
+            <input type="time" id="editgamestarttime" value="" placeholder="输入比赛开始时间">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <label for="editcomments" class="am-u-sm-5 am-form-label">备注</label>
+        <div class="am-u-sm-7">
+            <input type="text" id="editcomments" value="" placeholder="输入备注">
+        </div>
+    </div>
+
+    <div class="am-form-group">
+        <button type="submit" class="am-btn am-btn-default" onclick="editGame()">保存</button>
+        <button type="button" class="am-btn am-btn-default" onclick="cancelEditGame()">取消</button>
+    </div>
+</form>
+
+<div class="am-modal am-modal-loading am-modal-no-btn" tabindex="-1" id="my-modal-loading">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">正在载入...</div>
+        <div class="am-modal-bd">
+            <span class="am-icon-spinner am-icon-spin"></span>
+        </div>
+    </div>
+</div>
+
+</body>
+
+{% include 'footer.html' %}
+
+<script src="{% static 'js/games.js' %}"></script>
+<script src="{% static 'js/jquery.mobile.min.js' %}"></script>
+<!--script type="text/javascript" src="{% static 'js/zepto.min.js' %}"></script-->
+<script type="text/javascript" src="{% static 'js/notice.js' %}"></script>
+
+<script type="text/javascript">
+    'use strict';
+
+    try{
+        $(document).ready(function() {
+            var date = new Date().Format('yyyyMMdd');
+            datepickerInit('#datepicker', date);
+            getGamesByDate(date, null);
+        });
+    }catch(e){
+        alert(e.message);
+    }
+</script>
+</html>

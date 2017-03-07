@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ static_url('css/gh-buttons.css') }}">
+    <script src="{{ static_url('js/jquery.js') }}"></script>
+    <script src="{{ static_url('js/jquery.validate.min.js') }}"></script>
+    <script src="{{ static_url('js/messages_zh.min.js') }}"></script>
+    <style>
+        .error{
+            color:red;
+        }
+
+    </style>
+</head>
+<body>
+<div align="center">
+    <h1>比赛</h1>
+</div>
+<div id="list" style="display: block" align="center">
+    <div>
+        {% if role == 1 %}
+        <h2><a onclick="overlay()" class="button icon add">添加</a></h2>
+        {% end %}
+    </div>
+    <div>
+        {% for i in games %}
+        <h1>
+            <a href="{{ i['url'] }}">{{ i['name'] }}</a>
+        </h1>
+        <h2>开始时间</h2>
+        <h2>{{ i['starttime'] }}</h2>
+        <h2>结束时间</h2>
+        <h2>{{ i['endtime'] }}</h2>
+        {% end %}
+    </div>
+</div>
+<div id="add" style="display: none" align="center">
+    <div>
+        <a onclick="overlay()" href="" class="button icon approve">取消</a>
+        <form method="post" action="/games/add" id="addForm">
+            <input type="hidden" name="now" value="{{ now }}">
+            <div>
+                <h1>
+                    比赛名称：<input type="text" name="name" style="height:30px; font_size:25px" id="name">
+                </h1>
+            </div>
+            <div>
+                <h1>
+                    开始时间：<input type="datetime-local" name="starttime" style="height:30px; font_size:25px"
+                                id="starttime">
+                </h1>
+            </div>
+            <div>
+                <h1>
+                    结束时间：<input type="datetime-local" name="endtime" style="height:30px; font_size:25px" id="endtime">
+                </h1>
+            </div>
+            <h1><input type="submit" value="提交"></h1>
+        </form>
+    </div>
+</div>
+
+<script>
+    $().ready(function () {
+        $.validator.addMethod("datetimeLocal", function (value, element) {
+            var reg = /^\d{4,}\-\d{2,}\-\d{2,}T\d{2,}:\d{2,}$/;
+            //alert(value.match(reg))
+            return value.match(reg);
+        }, "<label class='error'>请选择时间</label>");
+
+        $.validator.addMethod("compareDate", function (value, element) {
+            var starttime = $("#starttime").val();
+            var endtime = $("#endtime").val();
+            if(starttime && endtime){
+                return starttime < endtime;
+            }
+            return true;
+        }, "<label class='error'>开始时间请小于结束时间</label>");
+
+        $("#addForm").validate({
+            rules: {
+                name: {
+                    required: true,
+                    minlength: 1,
+                },
+                starttime: {
+                    required: true,
+                    datetimeLocal: true,
+                    compareDate: true,
+                },
+                endtime: {
+                    required: true,
+                    datetimeLocal: true,
+                    compareDate: true,
+                },
+            },
+            messages: {
+                name: {
+                    required: "请输入比赛名称",
+                },
+                starttime: {
+                    required: "请选择开始时间",
+
+                },
+                endtime: {
+                    required: "请选择结束时间",
+                },
+            }
+        });
+    })
+
+    function overlay() {
+        var e1 = document.getElementById('add');
+        e1.style.display = (e1.style.display == "block") ? "none" : "block";
+        var e2 = document.getElementById('list');
+        e2.style.display = (e2.style.display == "block") ? "none" : "block";
+    }
+
+</script>
+</body>
+</html>
